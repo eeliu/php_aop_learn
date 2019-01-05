@@ -4,6 +4,7 @@
             "Common/",
             "Plugins/",
             "Proxy/",
+            "app",
             "./"
         ]
     },
@@ -11,6 +12,7 @@
         "phpunit/phpunit": "^7"
     },
     "require": {
-        "nikic/php-parser": "^4.1"
+        "nikic/php-parser": "^4.1",
+        "monolog/monolog": "^1.24"
     }
 }
