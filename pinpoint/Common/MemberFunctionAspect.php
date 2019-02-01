@@ -11,7 +11,8 @@ use pinpoint\Common\Aspect;
 
 class MemberFunctionAspect extends Aspect
 {
-    public function __construct($name)
+
+    public function __construct($name,$plugins_name)
     {
         parent::__construct($name);
 
@@ -19,13 +20,14 @@ class MemberFunctionAspect extends Aspect
 
         // load origin file
 
-        //
+        // parse the define
 
     }
 
     public function onBefore()
     {
         // TODO: Implement onBefore() method.
+
     }
 
     public function onEnd()

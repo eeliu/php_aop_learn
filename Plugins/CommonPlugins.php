@@ -8,7 +8,7 @@ class CommonPlugins extends __TemplatePlugins
     public function __construct($apid,$who,...$args){
         parent::__construct($apid,$who,...$args);
     }
-    /// @hook:print_r
+    /// @hook:\app\Foo::print_r
     public function onBefore(){
         echo "onBefore";
     }
@@ -16,7 +16,7 @@ class CommonPlugins extends __TemplatePlugins
     public function onEnd($ret){
         echo "onEnd";
     }
-    /// @hook:connect
+
     public function onException(){
         echo "catch excepton";
     }

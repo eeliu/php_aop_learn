@@ -14,6 +14,7 @@ abstract class Aspect
     public function __construct($name)
     {
         $this->aspect_name = $name;
+
     }
 
     abstract function onBefore();
