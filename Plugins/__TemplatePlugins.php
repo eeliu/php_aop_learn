@@ -8,11 +8,12 @@
 namespace Pinpoint\Plugins;
 
 
-class TemplatePlugins
+class __TemplatePlugins
 {
     protected $apid;
     protected $who;
     protected $args;
+    protected $ret=null;
     public function __construct($apid,$who,...$args)
     {
         $this->apid = $apid;

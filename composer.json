@@ -1,11 +1,10 @@
 {
     "autoload": {
         "classmap": [
-            "Common/",
-            "Plugins/",
-            "Proxy/",
+            "pinpoint/Common/",
+            "pinpoint/",
             "app",
-            "./"
+            "tests"
         ]
     },
     "require-dev": {
@@ -13,6 +12,8 @@
     },
     "require": {
         "nikic/php-parser": "^4.1",
-        "monolog/monolog": "^1.24"
+        "monolog/monolog": "^1.24",
+        "apache/thrift": "^0.12.0",
+        "roave/better-reflection": "^3.2"
     }
 }

@@ -1,8 +1,9 @@
 <?php
 namespace Pinpoint\Plugins;
+use Pinpoint\Plugins\__TemplatePlugins;
 
-/// @hook:app\DBcontrol::getData1
-class CommonPlugins extends TemplatePlugins
+/// @hook:\app\Foo::foo_p1
+class CommonPlugins extends __TemplatePlugins
 {
     public function __construct($apid,$who,...$args){
         parent::__construct($apid,$who,...$args);
@@ -20,19 +21,3 @@ class CommonPlugins extends TemplatePlugins
         echo "catch excepton";
     }
 }
-
-/**
- * use Pinpoint\Plugins\CommonPlugins as CommonPlugins;
- * $var = new CommonPlugins("app\DBcontrol::getData1",$this,...$args);
- * $var->onBefore();
- * try{
- *  //todo if origin_getData1 has return
- * $ret = $this->origin_getData1(...$args);
- * }catch(Exception $e)
- * {
- * $var->enException();
- * }
- * // or $var->onEnd();
- * $var->onEnd($ret);
- *  return $ret;
- */

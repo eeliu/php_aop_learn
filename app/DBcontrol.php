@@ -6,6 +6,7 @@
  */
 
 namespace app;
+use Exception;
 use PDO;
 
 class DBcontrol
@@ -22,9 +23,9 @@ class DBcontrol
     }
 
     public function connectDb()
-    {
-        $this->con = new PDO("mysql:host=".$this->servername, $this->username,$this->password);
-    }
+    {echo "onbefore";
+    try{  $this->con = new PDO("mysql:host=".$this->servername, $this->username,$this->password);}catch (Exception $e){echo "exp";}
+    finally{echo "end";}}
 
     public function getData1()
     {
@@ -36,7 +37,11 @@ class DBcontrol
         return $ret;
     }
 
-    public function getData2()
+    /**
+     * @param $a
+     * @return array
+     */
+    public function getData2($a)
     {
         $ret = array();
         $sql = 'illegal sql';

@@ -34,3 +34,9 @@ require_once __DIR__."/vendor/autoload.php";
 //$log->error('Bar');
 
 
+//$_SERVER["a"] = 10;
+//print_r($_SERVER);
+//
+////$_SERVER["a"] = 10;
+//unset($_SERVER["a"]);
+//print_r($_SERVER);
