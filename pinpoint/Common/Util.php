@@ -11,7 +11,7 @@ use Composer\Autoload\ClassLoader;
 class Util
 {
     private static $origin_class_loader;
-
+    const StartWith = '\/\/\/@hook:';
     public static function findFile($class)
     {
         if(is_null(Util::$origin_class_loader))
@@ -25,8 +25,16 @@ class Util
                 }
             }
         }
-
         return realpath(Util::$origin_class_loader->findFile($class));
+    }
+
+    public static function parseUserFunc($str)
+    {
+        if(preg_match('/^'.self::StartWith.'./',$str))
+        {
+            return preg_split("/(".self::StartWith.")| /", $str,-1, PREG_SPLIT_NO_EMPTY);
+        }
+        return array();
     }
 
 }

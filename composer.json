@@ -3,6 +3,7 @@
         "classmap": [
             "pinpoint/Common/",
             "pinpoint/",
+            "Plugins",
             "app",
             "tests"
         ]
