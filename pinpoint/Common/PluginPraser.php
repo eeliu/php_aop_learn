@@ -7,7 +7,6 @@
 
 namespace pinpoint\Common;
 
-use mysql_xdevapi\Exception;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use PhpParser\Node;
@@ -74,7 +73,7 @@ class PluginParser
     {
         if( !file_exists($classFile))
         {
-            throw new Exception($classFile.": File not find");
+            throw new \Exception($classFile.": File not find");
         }
         $this->pluginsFile = $classFile;
         $this->funcArray = array();
@@ -94,12 +93,17 @@ class PluginParser
     {
         if(array_key_exists($funcName,$this->funcArray))
         {
-//            echo "\nupdate ".$funcName.$mode;
             $this->funcArray[$funcName]['mode'] |= $mode;
             return ;
         }
-//        echo "\nnew ".$funcName.$mode;
-        $this->funcArray[$funcName] = array('mode'=> $mode);
+        list($Cl,$func) = explode("::",$funcName);
+
+        $this->funcArray[$funcName] = array(
+            'mode'=> $mode,
+            'class'=>$Cl,
+            'func'=>$func
+        );
+
     }
 
 }

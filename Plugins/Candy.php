@@ -8,7 +8,7 @@
 namespace Pinpoint\Plugins;
 
 
-class __TemplatePlugins
+class Candy
 {
     protected $apid;
     protected $who;

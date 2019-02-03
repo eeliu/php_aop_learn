@@ -1,10 +1,10 @@
 <?php
 namespace Pinpoint\Plugins;
-use Pinpoint\Plugins\__TemplatePlugins;
+use Pinpoint\Plugins\Candy;
 
 ///@hook:app\Foo::foo_p1
 /// @hook:test wrong format
-class CommonPlugins extends __TemplatePlugins
+class CommonPlugin extends Candy
 {
     public function __construct($apid,$who,...$args){
         parent::__construct($apid,$who,...$args);

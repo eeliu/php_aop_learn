@@ -6,14 +6,14 @@
  */
 
 namespace app;
-use Pinpoint\Plugins\CommonPlugins;
+use Pinpoint\Plugins\CommonPlugin;
 
 class Foo extends Proxied_Foo
 {
     /// test 0 parameter
     public function foo0()
     {
-        $var =  new CommonPlugins('\app\Foo\foo0',$this,null);
+        $var =  new CommonPlugin('\app\Foo\foo0',$this,null);
         try
         {
             $var->onBefore();

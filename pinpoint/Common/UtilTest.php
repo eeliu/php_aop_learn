@@ -9,7 +9,7 @@ namespace pinpoint\Common;
 require_once __DIR__. '/../../vendor/autoload.php';
 use PHPUnit\Framework\TestCase;
 use pinpoint\Common\Util;
-use Pinpoint\Plugins\CommonPlugins;
+use Pinpoint\Plugins\CommonPlugin;
 
 class UtilTest extends TestCase
 {
@@ -17,7 +17,7 @@ class UtilTest extends TestCase
     public function testFindFile()
     {
         self::assertEquals(Util::findFile(UtilTest::class),__FILE__);
-        self::assertStringEndsWith('php', Util::findFile(CommonPlugins::class));
+        self::assertStringEndsWith('php', Util::findFile(CommonPlugin::class));
     }
     public function testparseUserFunc()
     {

@@ -37,4 +37,10 @@ class Util
         return array();
     }
 
+//    // app\Foo::foo_p1
+//    public static function DotStr2Func($str)
+//    {
+//
+//        return explode("::",str);
+//    }
 }

@@ -31,7 +31,7 @@ class MemberFunctionAspectTest extends TestCase
 
     public function test__construct()
     {
-        $var =  new MemberFunctionAspect("\app\Foo::foo_p1","\Pinpoint\Plugins\CommonPlugins");
+        $var =  new MemberFunctionAspect("app\Foo::foo_p1","Pinpoint\Plugins\CommonPlugins");
 
     }
 }

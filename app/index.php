@@ -7,7 +7,7 @@
 
 require_once __DIR__. '/../pinpoint/auto_pinpointed.php';
 
-
+//print_r("oj");
 //use app\DBcontrol as DBcontrol;
 //$loader = require_once __DIR__. '/../Common/PinpintAutoLoader.php';
 //

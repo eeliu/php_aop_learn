@@ -38,6 +38,7 @@ class PluginVisitor extends NodeVisitorAbstract
 
     public function leaveNode(Node $node)
     {
+        // todo ignore pinpoint namespace
         if ($node instanceof Node\Stmt\Namespace_) {
             $this->iParser->setNamespace(trim($node->name->toString()));
         }

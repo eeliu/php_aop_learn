@@ -8,7 +8,7 @@
 namespace pinpoint\Common;
 
 
-class ShadowClass
+class OriginClass1
 {
 
 }
