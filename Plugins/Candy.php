@@ -8,7 +8,7 @@
 namespace Pinpoint\Plugins;
 
 
-class Candy
+abstract class Candy
 {
     protected $apid;
     protected $who;
@@ -20,4 +20,10 @@ class Candy
         $this->who =  $who;
         $this->args = $args;
     }
+
+    abstract function onBefore();
+
+    abstract function onEnd($ret);
+
+    abstract function onException($e);
 }

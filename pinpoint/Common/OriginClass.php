@@ -6,6 +6,9 @@
  */
 
 namespace pinpoint\Common;
+use PhpParser\NodeVisitorAbstract;
+use PhpParser\Node;
+use pinpoint\Common\PluginParser;
 
 
 class OriginClass
@@ -17,12 +20,64 @@ class OriginClass
 
     private $prefixCacheDir;
 
-    public function setClassPrefix($prefix,$cacheDir)
+    private $node;
+
+    private $namespace;
+
+    private $className;
+
+    public function getNode()
+    {
+        return $this->node;
+    }
+
+    public function setClassPrefix(&$node, $prefix,$cacheDir)
     {
         $this->prefixClassName = $prefix;
         $this->prefixCacheDir  = $cacheDir;
+        $this->node = &$node;
     }
 
+    public function handleNamespaceNode(&$node)
+    {
+        assert($node instanceof Node\Stmt\Namespace_);
+        $this->namespace = $node->name->toString();
+    }
+
+    public function handleEnterClassNode(&$node)
+    {
+        assert($node instanceof Node\Stmt\Class_);
+        $this->className = $node->name->toString();
+    }
+
+    /**rename the class Proxied_foo
+     * @param $node
+     */
+    public function handleLeaveClassNode(&$node)
+    {
+        assert($node instanceof Node\Stmt\Class_);
+        $node->name->name = $this->prefixClassName.$this->className;
+    }
+
+    public function handleClassMethodNode(&$node)
+    {
+
+    }
+
+    public function handleAliasNode(&$node)
+    {
+
+    }
+
+    public function handleFuncCallNode(&$node)
+    {
+
+    }
+
+    public function handleMagicConstNode(&$node)
+    {
+
+    }
 
     //
     public function setAppendingFile($file)
@@ -33,14 +88,6 @@ class OriginClass
         }
     }
 
-//    public function
-
-    public function __toString()
-    {
-        // TODO: Implement __toString() method.
-
-        return '';
-    }
 }
 
 /**

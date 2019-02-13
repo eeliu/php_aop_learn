@@ -6,12 +6,25 @@
  */
 
 namespace pinpoint\Common;
-
+use pinpoint\Common\OrgSrcParse;
+use pinpoint\Common\AopClassLoader;
+use pinpoint\Common\ClassMap;
 
 class PinpointDriver
 {
-    private static $instance;
-    private $Cfg;
+    protected static $instance;
+    protected $Cfg;
+    protected $clAr;
+    protected $classMap;
+
+    /**
+     * @return mixed
+     */
+    public function getClassMap()
+    {
+        return $this->classMap;
+    }
+
     public static function getInstance(){
 
         if (!self::$instance) {
@@ -25,36 +38,50 @@ class PinpointDriver
     public function __construct($Cfg)
     {
         $this->Cfg = $Cfg;
+        $this->clAr = array();
+        $this->classMap =  new ClassMap($this->Cfg['class_index']);
+
     }
 
     public function init()
     {
 
-        //todo register  classloader
+        //todo read __class_index to register  classloader
 
+        //parse the plugins
         $pluFiles = glob($this->Cfg['plugin_path']."/*Plugin.php");
 
         $pluParsers = array();
         foreach ($pluFiles as $file)
         {
-            $pluParsers[] = new PluginParser($file);
+            $pluParsers[] = new PluginParser($file,$this->clAr);
         }
 
-        foreach ($pluParsers as $pluParser)
+        foreach ($this->clAr as $cl=> $info)
         {
-            
+            // - get cl_file
+
+            $file = Util::findFile($cl);
+
+            if(is_null($file))
+            {
+                //todo logging $cl and $file
+                echo $file.' '.$cl."\n";
+                continue;
+            }
+            $osr = new OrgSrcParse($file,$cl,$info);
+            list($shadow=>$shadowClassFile,$origin=>$originClassFile )= $osr->generateAllClass();
+
+            $this->classMap->insertMapping($shadow,$shadowClassFile);
+            $this->classMap->insertMapping($origin,$originClassFile);
+
+
         }
 
-        //todo checking __class_index => class_loader
+        $this->classMap->persistenceClassMapping($this->Cfg['class_index']);
 
-        //todo read plugins
-                // parse plugins
+        AopClassLoader::init($this->classMap);
 
-        //todo rendering code
-
-        //todo update __class_index.php
-
-        //todo update class_loder
     }
 
 

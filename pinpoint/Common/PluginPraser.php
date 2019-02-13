@@ -18,7 +18,7 @@ use pinpoint\Common\PluginVisitor;
 
 class PluginParser
 {
-    private $funcArray;
+    private $clArray;
 
 
     private $namespace;
@@ -38,11 +38,12 @@ class PluginParser
     }
 
     /**
+     * user could merge all Plugins, if duplicate, warning the innocent user
      * @return mixed
      */
-    public function getFuncArray()
+    public function getClArray()
     {
-        return $this->funcArray;
+        return $this->clArray;
     }
 
     /**
@@ -69,14 +70,12 @@ class PluginParser
         $this->className = $className;
     }
 
-    public function __construct($classFile)
+    public function __construct($classFile,&$clArray)
     {
-        if( !file_exists($classFile))
-        {
-            throw new \Exception($classFile.": File not find");
-        }
+        assert(file_exists($classFile));
         $this->pluginsFile = $classFile;
-        $this->funcArray = array();
+        $this->clArray = &$clArray;
+        $this->run();
     }
 
     public function run()
@@ -84,6 +83,9 @@ class PluginParser
         // todo , need add php5? php7 include php5 ?
         $parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
         $nodes = $parser->parse(file_get_contents($this->pluginsFile));
+
+        // find np and cl
+
         $nodeTraverser = new NodeTraverser;
         $nodeTraverser->addVisitor(new PluginVisitor($this));
         $nodeTraverser->traverse($nodes);
@@ -91,19 +93,22 @@ class PluginParser
 
     public function insertFunc($funcName, $mode)
     {
-        if(array_key_exists($funcName,$this->funcArray))
+        list($uCl,$uFunc) = explode("::",$funcName);
+
+        if(!array_key_exists($uCl,$this->clArray))
         {
-            $this->funcArray[$funcName]['mode'] |= $mode;
-            return ;
+            //  Cl = APP\Foo
+            //  func = open
+            $this->clArray[$uCl] = array( $uFunc =>
+                    array($mode,&$this->namespace,&$this->className));
+        }elseif (!array_key_exists($uFunc,$this->clArray[$uCl]))
+        {
+            $this->clArray[$uCl][$uFunc]= array($mode,&$this->namespace,&$this->className);
         }
-        list($Cl,$func) = explode("::",$funcName);
-
-        $this->funcArray[$funcName] = array(
-            'mode'=> $mode,
-            'class'=>$Cl,
-            'func'=>$func
-        );
-
+        else {
+            // when user tears the plugins, that only works on  $mode
+            $this->clArray[$uCl][$uFunc][0] |= $mode;
+        }
     }
 
 }

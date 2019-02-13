@@ -18,7 +18,20 @@ class Foo
     /// test 1 parameter
     public function foo_p1($p)
     {
+        $ch = \curl_init();
 
+        //        $ch = call_user_func('curl_init');
+
+        // ÉèÖÃURLºÍÏàÓ¦µÄÑ¡Ïî
+        //curl_setopt($ch, CURLOPT_URL, "http://www.example.com/");
+        \call_user_func_array(curl_setopt,array($ch, CURLOPT_URL, "http://www.example.com/"));
+
+        \curl_setopt($ch, CURLOPT_HEADER, 0);
+
+
+        \curl_exec($ch);
+
+        \curl_close($ch);
     }
 
     /// test 1 parameter

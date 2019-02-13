@@ -23,7 +23,7 @@ class PluginVisitor extends NodeVisitorAbstract
         throw new \Exception("illegal input");
     }
 
-
+    ///$PluginsInfo => class
     private function loadCommentFunc(&$node,$mode)
     {
        foreach( $node->getComments() as &$doc)
@@ -33,7 +33,7 @@ class PluginVisitor extends NodeVisitorAbstract
             {
                 $this->iParser->insertFunc($func,$mode);
             }
-        }
+       }
     }
 
     public function leaveNode(Node $node)
@@ -44,13 +44,12 @@ class PluginVisitor extends NodeVisitorAbstract
         }
         elseif($node instanceof Node\Stmt\Class_)
         {
-            $cname = $node->name->toString();
-            $this->iParser->setClassName($cname);
+            $this->iParser->setClassName(trim($node->name->toString()));
             $this->loadCommentFunc($node, PluginParser::ALL);
         }
         elseif($node instanceof Node\Stmt\ClassMethod)
         {
-            // fetch method level
+
             $name = $node->name->toString();
             $node->getComments();
             switch($name)
@@ -67,7 +66,6 @@ class PluginVisitor extends NodeVisitorAbstract
                 default:
                     // do nothing
             }
-
         }
     }
 }

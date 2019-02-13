@@ -4,6 +4,7 @@
             "pinpoint/Common/",
             "pinpoint/",
             "Plugins",
+            "pinpoint/internal_template/",
             "app",
             "tests"
         ]

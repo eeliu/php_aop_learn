@@ -22,7 +22,7 @@ class CommonPlugin extends Candy
     }
 
     ///@hook:app\Foo::curl_init
-    public function onException(){
+    public function onException($e){
         echo "catch excepton";
     }
 }
