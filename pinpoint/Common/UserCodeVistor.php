@@ -6,40 +6,59 @@
  */
 
 namespace pinpoint\Common;
+
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
-use pinpoint\Common\PluginParser;
+
 
 class UserCodeVisitor extends NodeVisitorAbstract
 {
 
-    private $cDir;
-    private $className;
-    private $methodName;
-    private $namespace;
-    private $aliasing; // array
+    private $ignAliasAr;
 
-    public function __construct()
+    protected $ospIns;
+    private $curNamespace;
+    private $curClass;
+
+    public function __construct($ospIns)
     {
-
+        assert($ospIns instanceof OrgSrcParse);
+        $this->ospIns = $ospIns;
+        $this->ignAliasAr = array();
     }
 
     public function enterNode(Node $node)
     {
         if($node instanceof Node\Stmt\Namespace_){
+
+            $this->curNamespace = $node->name->toString();
             /// set namespace
+            $this->ospIns->originClass->handleEnterNamespaceNode($node);
+            $this->ospIns->shadowClass->handleEnterNamespaceNode($node);
         }
         elseif ($node instanceof Node\Stmt\Use_){
+
             foreach ($node->uses as $use)
             {
-///              $use->alias->name check function whether monitored
-///              if find, drop it
+                $this->ignAliasAr[] = $use->alias->toString();
             }
         }
-        elseif($node instanceof Node\Stmt\Class_){
-            /// rename  origin_class
-            /// set shadow class name
-            ///
+        elseif ($node instanceof Node\Stmt\Class_){
+
+            if( $this->curNamespace.'\\'.$node->name->toString() != $this->curClass)
+            {
+                // ignore uncared
+                echo "NodeTraverser::DONT_TRAVERSE_CHILDREN @".$node->name->toString();
+                return NodeTraverser::DONT_TRAVERSE_CHILDREN;
+            }
+
+            $this->ospIns->originClass->handleEnterClassNode($node);
+            $this->ospIns->shadowClass->handleEnterClassNode($node);
+
+        }elseif ($node instanceof Node\Stmt\ClassMethod)
+        {
+            $this->ospIns->originClass->handleClassEnterMethodNode($node);
+            $this->ospIns->shadowClass->handleClassEnterMethodNode($node);
         }
     }
 
@@ -47,16 +66,28 @@ class UserCodeVisitor extends NodeVisitorAbstract
     public function leaveNode(Node $node)
     {
         if ($node instanceof Node\Stmt\ClassMethod){
-            /// check cared?
-            ///
-            /// insert it & mode into shadow class
-            ///
+
+            $func = $node->name->toString();
+            if(array_key_exists($func,$this->ospIns->mFuncAr))
+            {
+                $this->ospIns->originClass->handleClassLeaveMethodNode($node);
+                $this->ospIns->shadowClass->handleClassMethodNode($node);
+            }
+
         }elseif ($node instanceof Node\Expr\FuncCall){
-            ///  Node\Name\FullyQualified => PhpParser\Node\Name
+            $func =  $node->name->toString();
+            if(array_key_exists($func,$this->ospIns->mFuncAr))
+            {
+                /// \print_r => print_r remove slash
+                $ret = $this->ospIns->originClass->handleFuncCallNode($node);
+                if($ret) {
+                    return $ret;
+                }
+            }
         }
-        elseif ($node instanceof Node\Scalar\MagicConst)
-        {
-            $ret = $this->renderMagicConst($node);
+        elseif ($node instanceof Node\Scalar\MagicConst){
+            // replace __LINE__ __DIR__
+            $ret = $this->ospIns->originClass->handleMagicConstNode($node);
             if($ret)
             {
                 return $ret;
@@ -64,29 +95,9 @@ class UserCodeVisitor extends NodeVisitorAbstract
         }
     }
 
-    protected function renderMagicConst($node)
+    public function afterTraverse(array $nodes)
     {
-        assert($node instanceof Node\Scalar\MagicConst);
-        switch ($node->getName())
-        {
-            case '__LINE__':
-                break;
-            case '__FILE__':
-                break;
-            case '__DIR__':
-                break;
-            case '__FUNCTION__':
-                break;
-            case '__CLASS__':
-                break;
-            case '__METHOD__':
-                break;
-            case '__NAMESPACE__':
-                break;
-            default:
-                break;
-        }
-        return null;
+        $this->ospIns->shadowClass->handleAfterTravers($nodes);
     }
 
 

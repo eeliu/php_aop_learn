@@ -75,7 +75,6 @@ class PinpointDriver
             $this->classMap->insertMapping($shadow,$shadowClassFile);
             $this->classMap->insertMapping($origin,$originClassFile);
 
-
         }
 
         $this->classMap->persistenceClassMapping($this->Cfg['class_index']);
