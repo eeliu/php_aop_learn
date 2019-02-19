@@ -6,7 +6,7 @@
  */
 
 namespace pinpoint\Common;
-use pinpoint\Common\OrgSrcParse;
+use pinpoint\Common\OrgClassParse;
 use pinpoint\Common\AopClassLoader;
 use pinpoint\Common\ClassMap;
 
@@ -69,7 +69,7 @@ class PinpointDriver
                 echo $file.' '.$cl."\n";
                 continue;
             }
-            $osr = new OrgSrcParse($file,$cl,$info);
+            $osr = new OrgClassParse($file,$cl,$info);
             list($shadow=>$shadowClassFile,$origin=>$originClassFile )= $osr->generateAllClass();
 
             $this->classMap->insertMapping($shadow,$shadowClassFile);

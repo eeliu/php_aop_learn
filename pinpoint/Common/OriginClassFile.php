@@ -13,10 +13,13 @@ use pinpoint\Common\ClassFile;
 
 class OriginClassFile extends ClassFile
 {
+    /** dir assign to __DIR__
+     * @var string
+     */
     protected $orgDir;
     protected $orgFile;
 
-    public function __construct(string $prefix = 'Proxied_',$fullFile)
+    public function __construct($fullFile,$prefix = 'Proxied_')
     {
         parent::__construct($prefix);
 
@@ -32,18 +35,30 @@ class OriginClassFile extends ClassFile
     public function handleLeaveClassNode(&$node)
     {
         assert($node instanceof Node\Stmt\Class_);
+        // Foo ->Proxied_Foo
         $node->name->name = $this->prefixClassName.$this->className;
+        if($node->flags & Node\Stmt\Class_::MODIFIER_FINAL)
+        {
+            /// remove FINAL flag
+            $node->flags = $node->flags & ( ~(Node\Stmt\Class_::MODIFIER_FINAL) );
+        }
     }
 
-    public function handleClassLeaveMethodNode(&$node)
+    public function handleClassLeaveMethodNode(&$node,&$info)
     {
-
+        assert($node instanceof Node\Stmt\ClassMethod);
+        if($node->flags &  Node\Stmt\Class_::MODIFIER_PRIVATE)
+        {
+            $node->flags = $node->flags &(~Node\Stmt\Class_::MODIFIER_PRIVATE);
+        }
     }
 
 
     public function handleFuncCallNode(&$node)
     {
-
+        /// todo remove slash,
+        /// \print_r ->print_r
+        ///
     }
 
     public function handleMagicConstNode(&$node)
@@ -80,20 +95,31 @@ class OriginClassFile extends ClassFile
     //
     public function setAppendingFile($file)
     {
+        // modify the namespace
         if(!in_array($file,$this->appendingFile))
         {
             $this->appendingFile[] = $file;
         }
     }
 
-    public function handleAfterTravers($nodes)
+    public function handleLeaveNamespace(&$nodes,&$mFuncAr)
     {
+        /// todo
+        ///  render header file: insert namespace
+        ///  add require
+        ///
+//        $this->fileNode = $nodes;
+//
+//        foreach ($mFuncAr as $fun=>$info)
+//        {
+//            /// render header file: insert namespace
+//
+//            /// add require
+//        }
+    }
 
+    public function handleAfterTravers(&$nodes,&$mFuncAr)
+    {
+        return $nodes;
     }
 }
-
-/**
- * remove class final , rename class name
- *
- * remove class method mod ->protected
- */

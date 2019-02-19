@@ -1,17 +1,14 @@
 <?php
-/**
- * User: eeliu
- * Date: 2/11/19
- * Time: 4:08 PM
- */
-
-namespace pinpoint\internal_template;
+namespace Test;
 
 class pinpoint_curl{
+    const module='curl';
+
     private $ch;
-    function __construct()
+
+    public function  curl_init($curl)
     {
-        $this->ch = call_user_func("curl_init");
+        return $ch = \curl_init($curl);
     }
 
     function __call($name, $arguments)
@@ -22,5 +19,19 @@ class pinpoint_curl{
 //        var_dump($arguments);
         return call_user_func_array($name,$arguments);
     }
+}
 
+
+/// todo use php-parse to insert other functions
+
+function curl_init()
+{
+
+//    $p = new curlPlugins();
+
+//    $p->onBefore();
+    $ret = call_user_func('curl_init');
+
+//    $p->onEnd($ret);
+    return $ret;
 }

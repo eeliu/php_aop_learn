@@ -9,7 +9,7 @@ namespace pinpoint\Common;
 
 use PhpParser\Node;
 
-class ClassFile
+abstract class ClassFile
 {
     public $appendingFile = array();
 
@@ -19,13 +19,17 @@ class ClassFile
 
     public $namespace;
 
-    public $className;
+    public $className; /// Foo\A Foo\B
 
     public $classMethod;
 
     public $funcName; // only for __FUNCTION__
 
     protected $dir;
+
+    public $hasRet;
+
+    public $fileNode;
 
     public function __construct($prefix)
     {
@@ -40,13 +44,13 @@ class ClassFile
     public function handleEnterNamespaceNode(&$node)
     {
         assert($node instanceof Node\Stmt\Namespace_);
-        $this->namespace = $node->name->toString();
+        $this->namespace = trim($node->name->toString());
     }
 
     public function handleEnterClassNode(&$node)
     {
         assert($node instanceof Node\Stmt\Class_);
-        $this->className = $this->namespace.'\\'.$node->name->toString();
+        $this->className = trim($this->namespace.'\\'.$node->name->toString());
     }
 
     public function handleClassEnterMethodNode(&$node)
@@ -54,5 +58,16 @@ class ClassFile
         assert($node instanceof Node\Stmt\ClassMethod);
         $this->funcName = $node->name->toString();
         $this->classMethod =$this->className.'::'.$this->funcName;
+        $this->hasRet = false;
     }
+
+    abstract function handleClassLeaveMethodNode(&$node,&$info);
+
+    public function handleReturnNode(&$node)
+    {
+        $this->hasRet = true;
+    }
+
+    abstract function handleAfterTravers(&$nodes,&$mFuncAr);
+    abstract function handleLeaveNamespace(&$nodes,&$mFuncAr);
 }

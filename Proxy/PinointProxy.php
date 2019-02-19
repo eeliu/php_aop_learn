@@ -5,7 +5,7 @@
  * Time: 6:48 PM
  */
 namespace Pinpoint;
-use PDO;
+//use PDO;
 /**
  *  register classloader if needs
  *  require built-in function
@@ -27,7 +27,7 @@ $username = "root";
 $password = "root";
 
 try {
-    $conn = new PDO("mysql:host=$servername;", $username, $password);
+    $conn = new \PDO("mysql:host=$servername;", $username, $password);
     $sql = 'show databases;';
     foreach ($conn->query($sql) as $row) {
         print_r($row);

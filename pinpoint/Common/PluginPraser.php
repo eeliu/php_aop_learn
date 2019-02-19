@@ -7,7 +7,6 @@
 
 namespace pinpoint\Common;
 
-use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use PhpParser\Node;
 use PhpParser\Node\Name;
@@ -100,10 +99,10 @@ class PluginParser
             //  Cl = APP\Foo
             //  func = open
             $this->clArray[$uCl] = array( $uFunc =>
-                    array($mode,&$this->namespace,&$this->className));
+                    array($mode,$this->namespace,$this->className));
         }elseif (!array_key_exists($uFunc,$this->clArray[$uCl]))
         {
-            $this->clArray[$uCl][$uFunc]= array($mode,&$this->namespace,&$this->className);
+            $this->clArray[$uCl][$uFunc]= array($mode,$this->namespace,$this->className);
         }
         else {
             // when user tears the plugins, that only works on  $mode

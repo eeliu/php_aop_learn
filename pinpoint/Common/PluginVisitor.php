@@ -36,20 +36,22 @@ class PluginVisitor extends NodeVisitorAbstract
        }
     }
 
-    public function leaveNode(Node $node)
+    public function enterNode(Node $node)
     {
-        // todo ignore pinpoint namespace
         if ($node instanceof Node\Stmt\Namespace_) {
             $this->iParser->setNamespace(trim($node->name->toString()));
         }
-        elseif($node instanceof Node\Stmt\Class_)
-        {
+        elseif($node instanceof Node\Stmt\Class_) {
             $this->iParser->setClassName(trim($node->name->toString()));
             $this->loadCommentFunc($node, PluginParser::ALL);
         }
-        elseif($node instanceof Node\Stmt\ClassMethod)
-        {
+    }
 
+    public function leaveNode(Node $node)
+    {
+        // todo ignore pinpoint namespace
+        if($node instanceof Node\Stmt\ClassMethod)
+        {
             $name = $node->name->toString();
             $node->getComments();
             switch($name)

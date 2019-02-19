@@ -22,7 +22,7 @@ class UserCodeVisitor extends NodeVisitorAbstract
 
     public function __construct($ospIns)
     {
-        assert($ospIns instanceof OrgSrcParse);
+        assert($ospIns instanceof OrgClassParse);
         $this->ospIns = $ospIns;
         $this->ignAliasAr = array();
     }
@@ -33,8 +33,8 @@ class UserCodeVisitor extends NodeVisitorAbstract
 
             $this->curNamespace = $node->name->toString();
             /// set namespace
-            $this->ospIns->originClass->handleEnterNamespaceNode($node);
             $this->ospIns->shadowClass->handleEnterNamespaceNode($node);
+            $this->ospIns->originClass->handleEnterNamespaceNode($node);
         }
         elseif ($node instanceof Node\Stmt\Use_){
 
@@ -52,13 +52,17 @@ class UserCodeVisitor extends NodeVisitorAbstract
                 return NodeTraverser::DONT_TRAVERSE_CHILDREN;
             }
 
-            $this->ospIns->originClass->handleEnterClassNode($node);
             $this->ospIns->shadowClass->handleEnterClassNode($node);
+            $this->ospIns->originClass->handleEnterClassNode($node);
 
         }elseif ($node instanceof Node\Stmt\ClassMethod)
         {
-            $this->ospIns->originClass->handleClassEnterMethodNode($node);
             $this->ospIns->shadowClass->handleClassEnterMethodNode($node);
+            $this->ospIns->originClass->handleClassEnterMethodNode($node);
+        }
+        elseif ( $node instanceof Node\Stmt\Return_)
+        {
+            $this->ospIns->shadowClass->handleReturnNode($node);
         }
     }
 
@@ -66,38 +70,37 @@ class UserCodeVisitor extends NodeVisitorAbstract
     public function leaveNode(Node $node)
     {
         if ($node instanceof Node\Stmt\ClassMethod){
+            $func = trim( $node->name->toString());
 
-            $func = $node->name->toString();
             if(array_key_exists($func,$this->ospIns->mFuncAr))
             {
-                $this->ospIns->originClass->handleClassLeaveMethodNode($node);
-                $this->ospIns->shadowClass->handleClassMethodNode($node);
+                $this->ospIns->shadowClass->handleClassLeaveMethodNode($node,$this->ospIns->mFuncAr[$func]);
+                $this->ospIns->originClass->handleClassLeaveMethodNode($node,$this->ospIns->mFuncAr[$func]);
+                unset( $this->ospIns->mFuncAr[$func] );
             }
 
         }elseif ($node instanceof Node\Expr\FuncCall){
-            $func =  $node->name->toString();
-            if(array_key_exists($func,$this->ospIns->mFuncAr))
-            {
-                /// \print_r => print_r remove slash
-                $ret = $this->ospIns->originClass->handleFuncCallNode($node);
-                if($ret) {
-                    return $ret;
-                }
-            }
+            /// todo parse internal funcCall
         }
         elseif ($node instanceof Node\Scalar\MagicConst){
-            // replace __LINE__ __DIR__
+            /// replace __LINE__ __DIR__
             $ret = $this->ospIns->originClass->handleMagicConstNode($node);
-            if($ret)
-            {
+            if($ret){
                 return $ret;
             }
+        }elseif ($node instanceof Node\Stmt\Namespace_){
+            /// todo ending the np
         }
     }
 
     public function afterTraverse(array $nodes)
     {
-        $this->ospIns->shadowClass->handleAfterTravers($nodes);
+        $this->ospIns->shadowClassNodeDoneCB($this->ospIns->shadowClass->handleAfterTravers($nodes,
+            $this->ospIns->mFuncAr),$this->ospIns->shadowClass->className);
+
+        $this->ospIns->orgClassNodeDoneCB($this->ospIns->originClass->handleAfterTravers($nodes,
+            $this->ospIns->mFuncAr),$this->ospIns->originClass->className);
+//        $this->ospIns->
     }
 
 

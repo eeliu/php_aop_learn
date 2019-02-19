@@ -1,9 +1,4 @@
 <?php
-/**
- * User: eeliu
- * Date: 2/3/19
- * Time: 2:09 PM
- */
 
 namespace pinpoint\Common;
 use pinpoint\Common\PluginParser;
