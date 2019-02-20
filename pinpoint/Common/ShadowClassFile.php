@@ -19,7 +19,7 @@ class ShadowClassFile extends ClassFile
 
 
     private $classNode;
-    private $useNodes = [];
+    private $useArray = [];
     private $methodNodes = [];
 
     public function __construct($prefix = 'Proxied_')
@@ -32,15 +32,17 @@ class ShadowClassFile extends ClassFile
     public function handleEnterNamespaceNode(&$node)
     {
         parent::handleEnterNamespaceNode($node);
-        assert($node instanceof Node\Stmt\Namespace_);
+
     }
 
     public function handleEnterClassNode(&$node)
     {
         parent::handleEnterClassNode($node);
-        assert($node instanceof Node\Stmt\Class_);
 
-        $this->classNode = $this->factory->class(trim($node->name->toString()))->extend($this->prefix.'_'.$node->name->toString());
+        assert($node instanceof Node\Stmt\Class_);
+        $extClass = $this->prefix.'_'.$node->name->toString();
+        $this->classNode  = $this->factory->class(trim($node->name->toString()))->extend($extClass);
+        $this->useArray[] = $this->namespace.'\\'.$extClass;
 
 //        const MODIFIER_STATIC    =  8;
 //        const MODIFIER_ABSTRACT  = 16;
@@ -58,23 +60,42 @@ class ShadowClassFile extends ClassFile
         }
     }
 
+    public static function convertParamsName2Arg($params)
+    {
+        assert(is_array($params));
+
+        $args = [];
+
+        foreach ($params as $param)
+        {
+            assert($param instanceof Node\Param);
+            $args [] = new Node\Arg($param->var);
+        }
+        return  $args;
+    }
 
     public function handleClassLeaveMethodNode(&$node,&$info)
     {
-        parent::handleClassEnterMethodNode($node);
+        /// todo this func looks ugly
+        echo __METHOD__;
         assert($node instanceof Node\Stmt\ClassMethod);
-        list($mode, $namespace, $className) = $info;
-        // use plugins\CommonPlugin
-        $this->useNodes[] = $this->factory->use($namespace . '\\' . $className);
 
-        $pluginArgs = $node->params;
+        list($mode, $namespace, $className) = $info;
+
+        $np = $namespace . '\\' . $className;
+
+        if(!in_array($np,$this->useArray)){
+            $this->useArray[] = $np;
+        }
+
+        // use plugins\CommonPlugin
         $thisFuncName = $node->name->toString();
 
 
         $funcVar = new Node\Arg(new Node\Scalar\MagicConst\Method());
-        $selfVar = new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('this')));
+        $selfVar = new Node\Arg(new Node\Expr\Variable('this'));
 
-        array_unshift($pluginArgs, $funcVar, $selfVar);
+        $pluginArgs  = array_merge([$funcVar,$selfVar],ShadowClassFile::convertParamsName2Arg($node->params));
 
         $thisMethod = $this->factory->method($thisFuncName);
 
@@ -100,6 +121,7 @@ class ShadowClassFile extends ClassFile
 
         $thisMethod->addParams($node->params);
 
+        /// $var = new CommonPlugins(__FUNCTION__,self,$p);
         $newPluginsStm = new Node\Stmt\Expression(new Node\Expr\Assign(new Node\Expr\Variable("var"),
             $this->factory->new($className, $pluginArgs)));
 
@@ -107,59 +129,71 @@ class ShadowClassFile extends ClassFile
 
         $tryBlock = [];
         $catchNode = [];
-        $finallyBlock = [];
+
 
 
         if ($mode & PluginParser::BEFORE)
         {
             // $var->onBefore();
-            $tryBlock[] = $this->factory->methodCall(new Node\Expr\Variable("var"), "onBefore", []);
+            $tryBlock[] = new Node\Stmt\Expression(
+                $this->factory->methodCall(new Node\Expr\Variable("var"), "onBefore"));
         }
-
             // paraent::$thisFuncName
         if ($this->hasRet) {
             $tryBlock[] = new Node\Stmt\Expression(new Node\Expr\Assign(
                 new Node\Expr\Variable("ret"),
                 new Node\Expr\StaticCall(new Node\Name("parent"),
-                    new Node\Identifier($thisFuncName), $node->params)));
+                    new Node\Identifier($thisFuncName),
+                    ShadowClassFile::convertParamsName2Arg($node->params))));
         } else {
-            $tryBlock[] = $this->factory->staticCall(
-                new Node\Expr\Variable("parent")
-                , new Node\Identifier($thisFuncName), $node->params);
+            $tryBlock[] = new Node\Stmt\Expression($this->factory->staticCall(
+                new Node\Name("parent")
+                , new Node\Identifier($thisFuncName),
+                ShadowClassFile::convertParamsName2Arg($node->params)));
         }
 
 
         $expArgs = [];
         $expArgs[] = new Node\Arg(new Node\Expr\Variable('e')) ;
+
         if ($mode & PluginParser::EXCEPTION) {
-            $catchBlock[] = $this->factory->methodCall(new Node\Expr\Variable("var"), "onException",$expArgs);
+
+            $catchBlock[] = new Node\Stmt\Expression(
+                $this->factory->methodCall(new Node\Expr\Variable("var"),
+                    "onException",$expArgs));
+
         } else {
+
             $catchBlock[] = new Node\Stmt\Throw_(new Node\Expr\Variable("e"));
         }
 
         $catchNode[] = new Node\Stmt\Catch_([new Node\Name('\Exception')],
                                     new Node\Expr\Variable('e'),
                                     $catchBlock);
-
-
-        /// if onEnd
-        if ($this->hasRet) {
-            $finallyBlock[] = new Node\Stmt\Expression(
-                $this->factory->methodCall(
-                    new Node\Expr\Variable("var"),
-                    "onEnd",
-                    [new Node\Expr\Variable('ret')])
-            );
-        }else{
-            $finallyBlock[] = new Node\Stmt\Expression(
-                $this->factory->methodCall(
-                    new Node\Expr\Variable("var"),
-                    "onEnd",
-                    [new Node\Expr\Variable('null')])
-            );
+        $finallyBlock = [];
+        if($mode & PluginParser::END)
+        {
+            /// if onEnd
+            if ($this->hasRet) {
+                $finallyBlock[] = new Node\Stmt\Expression(
+                    $this->factory->methodCall(
+                        new Node\Expr\Variable("var"),
+                        "onEnd",
+                        [new Node\Expr\Variable('ret')])
+                );
+            }else{
+                $finallyBlock[] = new Node\Stmt\Expression(
+                    $this->factory->methodCall(
+                        new Node\Expr\Variable("var"),
+                        "onEnd",
+                        [new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('null')))])
+                );
+            }
         }
 
-        $tryCatchFinallyNode= new Node\Stmt\TryCatch($tryBlock,$catchNode,$finallyBlock);
+        $finallyNode =  new Node\Stmt\Finally_($finallyBlock);
+
+        $tryCatchFinallyNode = new Node\Stmt\TryCatch($tryBlock,$catchNode,$finallyNode);
 
         $thisMethod->addStmt($tryCatchFinallyNode);
         $this->methodNodes[] = $thisMethod;
@@ -167,11 +201,18 @@ class ShadowClassFile extends ClassFile
 
     public function handleAfterTravers(&$nodes,&$mFuncAr)
     {
+        $useNodes = [];
+        foreach ($this->useArray as $useAlias){
+            $useNodes[] = $this->factory->use($useAlias);
+        }
+
         $this->fileNode = $this->factory->namespace($this->namespace)
-            ->addStmts($this->useNodes)
-            ->addStmt($this->classNode)
-            ->addStmts($this->methodNodes);
-        return $this->fileNode;
+            ->addStmts($useNodes)
+            ->addStmt(
+                $this->classNode->addStmts($this->methodNodes)
+            );
+
+        return $this->fileNode->getNode();
     }
 
     function handleLeaveNamespace(&$nodes, &$mFuncAr)

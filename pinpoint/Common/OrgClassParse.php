@@ -29,11 +29,10 @@ class OrgClassParse
     public $cfg;
 
     private $originClassNode;
-    private $shadowClassNode;
 
     private $rawOrigStmts;
 
-    private $classIndex = [];
+    public $classIndex = [];
 
     public $className;// app\foo\DBManager
 
@@ -78,11 +77,11 @@ class OrgClassParse
 
         $this->traverser = new NodeTraverser();
         $this->traverser->addVisitor(new NodeVisitor\CloningVisitor());
-        $this->printer = new PrettyPrinter\Standard();
+        $this->traverser->addVisitor(new UserCodeVisitor($this));
 
+        $this->printer = new PrettyPrinter\Standard();
         $this->originClass = new OriginClassFile($file,OrgClassParse::PRE_FIX);
         $this->shadowClass =  new ShadowClassFile(OrgClassParse::PRE_FIX);
-        $this->traverser->addVisitor(new UserCodeVisitor($this));
 
         $this->parseOriginFile();
     }
@@ -90,42 +89,33 @@ class OrgClassParse
     protected function parseOriginFile()
     {
         $code = file_get_contents($this->originFile);
+
         $this->rawOrigStmts = $this->parser->parse($code);
 
         $this->originClassNode = $this->traverser->traverse($this->rawOrigStmts);
 
     }
 
-    public function getOriginClass(){
-
-    }
-
-    public function getShadowClass(){
-
-    }
-
     public function orgClassNodeDoneCB(&$node,$fullName)
     {
-        $fullPath = $this->cfg['plugin_path'].'/'.str_replace('\\','/',$fullName).'.php';
-
+        $fullPath = $this->cfg['cache_dir'].'/'.str_replace('\\','/',$fullName).'.php';
+        // try to keep blank and filenu
         $orgClassStr = $this->printer->printFormatPreserving(
-            $this->traverser->traverse($this->originClassNode),
+            $node,
             $this->rawOrigStmts,
             $this->lexer->getTokens());
 
         $this->flushStr2File($orgClassStr,$fullPath);
-        $this->classIndex['origin'] = $fullPath;
+        $this->classIndex[$fullName] = $fullPath;
     }
 
     public function shadowClassNodeDoneCB(&$node,$fullName)
     {
-        $fullPath = $this->cfg['plugin_path'].'/'.str_replace('\\','/',$fullName).'.php';
-
-        $this->flushStr2File( $this->printer->prettyPrint($node),$fullPath);
-        $this->classIndex['shadow'] = $fullPath;
+        $fullPath = $this->cfg['cache_dir'].'/'.str_replace('\\','/',$fullName).'.php';
+        $context= $this->printer->prettyPrintFile(array($node));
+        $this->flushStr2File($context,$fullPath);
+        $this->classIndex[$fullName] = $fullPath;
     }
-
-
 
     public function flushStr2File(&$context, $fullPath)
     {
@@ -133,13 +123,12 @@ class OrgClassParse
         if(!is_dir($dir)){
             mkdir($dir);
         }
-
         file_put_contents($fullPath,$context);
     }
 
     public function generateAllClass():array
     {
         /// ast to source
-        return array("shadow","origin");
+        return $this->classIndex;
     }
 }

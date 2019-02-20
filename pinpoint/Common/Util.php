@@ -34,7 +34,7 @@ class Util
         {
             return preg_split("/(".self::StartWith.")| /", $str,-1, PREG_SPLIT_NO_EMPTY);
         }
-        return array();
+        return [];
     }
 
 }

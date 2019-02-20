@@ -9,7 +9,7 @@ namespace pinpoint\Common;
 
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
-
+use PhpParser\NodeTraverser;
 
 class UserCodeVisitor extends NodeVisitorAbstract
 {
@@ -25,10 +25,12 @@ class UserCodeVisitor extends NodeVisitorAbstract
         assert($ospIns instanceof OrgClassParse);
         $this->ospIns = $ospIns;
         $this->ignAliasAr = array();
+        $this->curClass = $ospIns->className;
     }
 
     public function enterNode(Node $node)
     {
+//        echo "enter".$node->getType()."\n";
         if($node instanceof Node\Stmt\Namespace_){
 
             $this->curNamespace = $node->name->toString();
@@ -40,7 +42,7 @@ class UserCodeVisitor extends NodeVisitorAbstract
 
             foreach ($node->uses as $use)
             {
-                $this->ignAliasAr[] = $use->alias->toString();
+                $this->ignAliasAr[] = $use->name->toString();
             }
         }
         elseif ($node instanceof Node\Stmt\Class_){
@@ -48,7 +50,7 @@ class UserCodeVisitor extends NodeVisitorAbstract
             if( $this->curNamespace.'\\'.$node->name->toString() != $this->curClass)
             {
                 // ignore uncared
-                echo "NodeTraverser::DONT_TRAVERSE_CHILDREN @".$node->name->toString();
+                echo "NodeTraverser::DONT_TRAVERSE_CHILDREN @".$this->curClass;
                 return NodeTraverser::DONT_TRAVERSE_CHILDREN;
             }
 
@@ -69,6 +71,7 @@ class UserCodeVisitor extends NodeVisitorAbstract
 
     public function leaveNode(Node $node)
     {
+//        echo "leave".$node->getType()."\n";
         if ($node instanceof Node\Stmt\ClassMethod){
             $func = trim( $node->name->toString());
 
@@ -91,16 +94,21 @@ class UserCodeVisitor extends NodeVisitorAbstract
         }elseif ($node instanceof Node\Stmt\Namespace_){
             /// todo ending the np
         }
+        elseif ($node instanceof Node\Stmt\Class_){
+            $this->ospIns->originClass->handleLeaveClassNode($node);
+        }
     }
 
     public function afterTraverse(array $nodes)
     {
-        $this->ospIns->shadowClassNodeDoneCB($this->ospIns->shadowClass->handleAfterTravers($nodes,
-            $this->ospIns->mFuncAr),$this->ospIns->shadowClass->className);
-
-        $this->ospIns->orgClassNodeDoneCB($this->ospIns->originClass->handleAfterTravers($nodes,
-            $this->ospIns->mFuncAr),$this->ospIns->originClass->className);
-//        $this->ospIns->
+        $node = $this->ospIns->shadowClass->handleAfterTravers($nodes,
+            $this->ospIns->mFuncAr);
+        $this->ospIns->shadowClassNodeDoneCB($node,$this->ospIns->shadowClass->className);
+        echo $this->ospIns->shadowClass->className."\n";
+        $node = $this->ospIns->originClass->handleAfterTravers($nodes,
+            $this->ospIns->mFuncAr);
+        $this->ospIns->orgClassNodeDoneCB($node,$this->ospIns->originClass->className);
+        echo $this->ospIns->originClass->className."\n";
     }
 
 

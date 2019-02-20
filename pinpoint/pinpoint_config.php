@@ -6,8 +6,10 @@
  */
 
 
+
 return array(
     'plugin_path' =>__DIR__."/../Plugins",
-    "class_index"=>__DIR__.'/__class_index_table',
+    'class_index_file'=>__DIR__.'/__class_index_table',
+    'cache_dir'=>__DIR__.'/Cache/',
     "default_exception"=> Exception::class
 );

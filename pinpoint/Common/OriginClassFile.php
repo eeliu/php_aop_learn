@@ -29,14 +29,15 @@ class OriginClassFile extends ClassFile
     }
 
 
-    /**rename the class Proxied_foo
+    /** rename the class Proxied_foo
      * @param $node
      */
     public function handleLeaveClassNode(&$node)
     {
         assert($node instanceof Node\Stmt\Class_);
-        // Foo ->Proxied_Foo
-        $node->name->name = $this->prefixClassName.$this->className;
+
+        $node->name->name = $this->prefix.$node->name->name;
+        $this->className = $this->namespace.'\\'.$node->name->name;
         if($node->flags & Node\Stmt\Class_::MODIFIER_FINAL)
         {
             /// remove FINAL flag

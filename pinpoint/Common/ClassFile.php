@@ -53,6 +53,7 @@ abstract class ClassFile
         $this->className = trim($this->namespace.'\\'.$node->name->toString());
     }
 
+
     public function handleClassEnterMethodNode(&$node)
     {
         assert($node instanceof Node\Stmt\ClassMethod);

@@ -32,6 +32,7 @@ class Foo
         \curl_exec($ch);
 
         \curl_close($ch);
+        return $ch;
     }
 
     /// test 1 parameter

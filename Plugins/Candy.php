@@ -16,9 +16,15 @@ abstract class Candy
     protected $ret=null;
     public function __construct($apid,$who,...$args)
     {
+        /// todo start_this_aspect_trace
         $this->apid = $apid;
         $this->who =  $who;
         $this->args = $args;
+    }
+
+    public function __destruct()
+    {
+       ///todo stop_this_aspect_trace;
     }
 
     abstract function onBefore();

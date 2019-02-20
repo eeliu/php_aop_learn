@@ -11,6 +11,7 @@ namespace pinpoint\Common;
 class ClassMap
 {
     private $classMap;
+    public $index_file_name;
 
     /**
      * @return mixed
@@ -30,6 +31,10 @@ class ClassMap
     }
     public function __construct($file)
     {
-        /// deserialize $file
+        $this->index_file_name = $file;
+    }
+    public function debug()
+    {
+        print_r($this->classMap);
     }
 }

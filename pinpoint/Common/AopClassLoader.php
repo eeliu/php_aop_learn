@@ -66,8 +66,6 @@ class AopClassLoader //extends ClassLoader
             spl_autoload_register($loader);
         }
 
-//        var_dump(spl_autoload_functions());
-
         return self::$inInitalized;
     }
 

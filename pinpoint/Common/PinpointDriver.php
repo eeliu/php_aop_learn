@@ -38,9 +38,8 @@ class PinpointDriver
     public function __construct($Cfg)
     {
         $this->Cfg = $Cfg;
-        $this->clAr = array();
-        $this->classMap =  new ClassMap($this->Cfg['class_index']);
-
+        $this->clAr = [];
+        $this->classMap =  new ClassMap($this->Cfg['class_index_file']);
     }
 
     public function init()
@@ -50,8 +49,7 @@ class PinpointDriver
 
         //parse the plugins
         $pluFiles = glob($this->Cfg['plugin_path']."/*Plugin.php");
-
-        $pluParsers = array();
+        $pluParsers = [];
         foreach ($pluFiles as $file)
         {
             $pluParsers[] = new PluginParser($file,$this->clAr);
@@ -59,25 +57,27 @@ class PinpointDriver
 
         foreach ($this->clAr as $cl=> $info)
         {
-            // - get cl_file
+            echo $cl;
+            print_r($info);
 
             $file = Util::findFile($cl);
-
             if(is_null($file))
             {
                 //todo logging $cl and $file
                 echo $file.' '.$cl."\n";
                 continue;
             }
-            $osr = new OrgClassParse($file,$cl,$info);
-            list($shadow=>$shadowClassFile,$origin=>$originClassFile )= $osr->generateAllClass();
 
-            $this->classMap->insertMapping($shadow,$shadowClassFile);
-            $this->classMap->insertMapping($origin,$originClassFile);
-
+            $osr = new OrgClassParse($file,$cl,$info,$this->Cfg);
+            foreach ($osr->classIndex as $clName=>$path)
+            {
+                $this->classMap->insertMapping($clName,$path);
+            }
         }
 
-        $this->classMap->persistenceClassMapping($this->Cfg['class_index']);
+        $this->classMap->persistenceClassMapping($this->Cfg['class_index_file']);
+
+        $this->classMap->debug();
 
         AopClassLoader::init($this->classMap);
 
