@@ -34,7 +34,7 @@ class AopClassLoader //extends ClassLoader
                 $this->classMap[$class] = $file;
             }
         }
-        echo "findFile : $file\n";
+//        echo "findFile : $file\n";
         return $file;
 
     }
@@ -42,7 +42,7 @@ class AopClassLoader //extends ClassLoader
     public function loadClass($class)
     {
         $file = $this->findFile($class);
-        echo "$class \n";
+
         if ($file !== false) {
             include $file;
         }

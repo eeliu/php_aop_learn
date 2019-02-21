@@ -77,7 +77,7 @@ class ShadowClassFile extends ClassFile
     public function handleClassLeaveMethodNode(&$node,&$info)
     {
         /// todo this func looks ugly
-        echo __METHOD__;
+
         assert($node instanceof Node\Stmt\ClassMethod);
 
         list($mode, $namespace, $className) = $info;

@@ -24,14 +24,15 @@ class Foo
 
         // ÉèÖÃURLºÍÏàÓ¦µÄÑ¡Ïî
         //curl_setopt($ch, CURLOPT_URL, "http://www.example.com/");
-        \call_user_func_array(curl_setopt,array($ch, CURLOPT_URL, "http://www.example.com/"));
-
-        \curl_setopt($ch, CURLOPT_HEADER, 0);
-
-
-        \curl_exec($ch);
-
+//        \call_user_func_array(curl_setopt,array($ch, CURLOPT_URL, "http://www.example.com/"));
+//
+//        \curl_setopt($ch, CURLOPT_HEADER, 0);
+//
+//
+//        \curl_exec($ch);
+//
         \curl_close($ch);
+
         return $ch;
     }
 
@@ -44,7 +45,8 @@ class Foo
     /// test 1 parameter
     public function foo_p3($p1,$p2,$p3)
     {
-
+        echo "$p1 , $p2, $p3";
+        return $p1;
     }
 
     /// test 1 parameter
@@ -52,8 +54,6 @@ class Foo
     {
         $args = func_num_args();
         echo __METHOD__.":count=".count($args).__LINE__.__FUNCTION__.__NAMESPACE__.__CLASS__."\n";
-        if(true)
-            throw new \Exception("");
         return false;
     }
 

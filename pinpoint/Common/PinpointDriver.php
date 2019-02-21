@@ -61,19 +61,17 @@ class PinpointDriver
         {
             $pluParsers[] = new PluginParser($file,$this->clAr);
         }
+        print_r($this->clAr);
 
         foreach ($this->clAr as $cl=> $info)
         {
-            echo $cl;
-            print_r($info);
-
             $file = Util::findFile($cl);
-            if(is_null($file))
+            if(!$file)
             {
                 //todo logging $cl and $file
-                echo $file.' '.$cl."\n";
                 continue;
             }
+            echo "class: $cl => $file \n";
 
             $osr = new OrgClassParse($file,$cl,$info,$this->Cfg);
             foreach ($osr->classIndex as $clName=>$path)

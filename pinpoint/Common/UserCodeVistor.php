@@ -93,7 +93,7 @@ class UserCodeVisitor extends NodeVisitorAbstract
             /// todo ending the np
         }
         elseif ($node instanceof Node\Stmt\Class_){
-            $this->ospIns->originClass->handleLeaveClassNode($node);
+           return  $this->ospIns->originClass->handleLeaveClassNode($node);
         }
     }
 
@@ -102,11 +102,11 @@ class UserCodeVisitor extends NodeVisitorAbstract
         $node = $this->ospIns->shadowClass->handleAfterTravers($nodes,
             $this->ospIns->mFuncAr);
         $this->ospIns->shadowClassNodeDoneCB($node,$this->ospIns->shadowClass->className);
-        echo $this->ospIns->shadowClass->className."\n";
+
         $node = $this->ospIns->originClass->handleAfterTravers($nodes,
             $this->ospIns->mFuncAr);
         $this->ospIns->orgClassNodeDoneCB($node,$this->ospIns->originClass->className);
-        echo $this->ospIns->originClass->className."\n";
+
     }
 
 }

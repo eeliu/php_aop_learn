@@ -25,7 +25,7 @@ class OriginClassFile extends ClassFile
 
         $this->orgDir = dirname($fullFile);
         $this->orgFile = $fullFile;
-        $this->$prefix = $prefix;
+        $this->prefix = $prefix;
     }
 
 
@@ -35,14 +35,19 @@ class OriginClassFile extends ClassFile
     public function handleLeaveClassNode(&$node)
     {
         assert($node instanceof Node\Stmt\Class_);
+        $className =$this->prefix.$node->name->toString();
 
-        $node->name->name = $this->prefix.$node->name->name;
-        $this->className = $this->namespace.'\\'.$node->name->name;
+        echo "className: $className\n";
+//        unset($node->name);
+        $node->name = new Node\Identifier($className);
+
+        $this->className = $this->namespace.'\\'.$className;
         if($node->flags & Node\Stmt\Class_::MODIFIER_FINAL)
         {
             /// remove FINAL flag
             $node->flags = $node->flags & ( ~(Node\Stmt\Class_::MODIFIER_FINAL) );
         }
+
     }
 
     public function handleClassLeaveMethodNode(&$node,&$info)
@@ -66,9 +71,6 @@ class OriginClassFile extends ClassFile
     {
         switch ($node->getName())
         {
-//            case '__LINE__':
-//                return new Node\Scalar\LNumber($node->getLine());
-//                break;
             case '__FILE__':
                 return new Node\Scalar\String_($this->orgFile);
                 break;

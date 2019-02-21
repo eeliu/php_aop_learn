@@ -10,16 +10,16 @@ namespace Pinpoint\Plugins;
 
 abstract class Candy
 {
-    protected $apid;
+    protected $apId;
     protected $who;
     protected $args;
     protected $ret=null;
-    public function __construct($apid,$who,...$args)
+    public function __construct($apId,$who,&...$args)
     {
         /// todo start_this_aspect_trace
-        $this->apid = $apid;
+        $this->apId = $apId;
         $this->who =  $who;
-        $this->args = $args;
+        $this->args = &$args;
     }
 
     public function __destruct()

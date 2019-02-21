@@ -1,11 +1,7 @@
 {
     "autoload": {
         "classmap": [
-            "pinpoint/Common/",
-            "pinpoint/",
-            "Plugins",
-            "app",
-            "tests"
+            "./"
         ]
     },
     "require-dev": {

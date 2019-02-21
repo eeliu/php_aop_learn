@@ -11,5 +11,6 @@ use \app\Foo;
 
 $f = new Foo();
 
-var_dump($f->foo_p3_rbool(1,'2','3435'));
+echo ($f->foo_p3(1,'2','3435'));
 
+echo $f->foo_p1("placeholder");
