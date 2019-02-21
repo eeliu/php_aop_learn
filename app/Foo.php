@@ -51,7 +51,7 @@ class Foo
     public function foo_p3_rbool($p1,$p2,$p3):bool
     {
         $args = func_num_args();
-        echo __METHOD__.":count=".count($args)."\n";
+        echo __METHOD__.":count=".count($args).__LINE__.__FUNCTION__.__NAMESPACE__.__CLASS__."\n";
         if(true)
             throw new \Exception("");
         return false;

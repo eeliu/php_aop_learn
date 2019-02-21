@@ -66,9 +66,9 @@ class OriginClassFile extends ClassFile
     {
         switch ($node->getName())
         {
-            case '__LINE__':
-                return new Node\Scalar\LNumber($node->getLine());
-                break;
+//            case '__LINE__':
+//                return new Node\Scalar\LNumber($node->getLine());
+//                break;
             case '__FILE__':
                 return new Node\Scalar\String_($this->orgFile);
                 break;
