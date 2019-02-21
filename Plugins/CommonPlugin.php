@@ -16,8 +16,11 @@ class CommonPlugin extends Candy
     }
 
     ///@hook:app\DBcontrol::getData1
-    public function onEnd($ret){
-        echo "onEnd";
+    public function onEnd(&$ret){
+        if($ret === false)
+        {
+            $ret=true;
+        }
     }
 
     ///@hook:app\DBcontrol::getData2

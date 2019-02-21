@@ -39,14 +39,21 @@ class PinpointDriver
     {
         $this->Cfg = $Cfg;
         $this->clAr = [];
-        $this->classMap =  new ClassMap($this->Cfg['class_index_file']);
+
     }
 
     public function init()
     {
 
-        //todo read __class_index to register  classloader
+        if(file_exists($this->Cfg['class_index_file']))
+        {
+            $this->classMap =  new ClassMap($this->Cfg['class_index_file']);
+            $this->classMap->debug();
+            AopClassLoader::init($this->classMap->classMap);
+            return ;
+        }
 
+        $this->classMap =  new ClassMap();
         //parse the plugins
         $pluFiles = glob($this->Cfg['plugin_path']."/*Plugin.php");
         $pluParsers = [];
@@ -75,11 +82,11 @@ class PinpointDriver
             }
         }
 
-        $this->classMap->persistenceClassMapping($this->Cfg['class_index_file']);
+//        $this->classMap->persistenceClassMapping($this->Cfg['class_index_file']);
 
         $this->classMap->debug();
 
-        AopClassLoader::init($this->classMap);
+        AopClassLoader::init($this->classMap->classMap);
 
     }
 

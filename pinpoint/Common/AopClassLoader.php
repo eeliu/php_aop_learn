@@ -9,19 +9,23 @@ require_once __DIR__. '/../../vendor/autoload.php';
 class AopClassLoader //extends ClassLoader
 {
     public  static $inInitalized;
-    private $origin;
+    private $origin; //  origin classloader
     private $classMap;
-    public function __construct($classIndexFile)
+    public function __construct($origin, $classMap)
     {
-        if($classIndexFile)
+        if($classMap)
         {
             /// todo do thing
         }
+
+        $this->classMap = $classMap;
+
+        $this->origin = $origin;
     }
 
     public function findFile($class)
     {
-        $file = isset($this->classMap[$class]) ? $this->classMap[$class] : null;
+        $file = $this->classMap[$class];
         if( is_null($file )) {
             $file = $this->origin->findFile($class);
             if ($file !== false)
@@ -30,6 +34,7 @@ class AopClassLoader //extends ClassLoader
                 $this->classMap[$class] = $file;
             }
         }
+        echo "findFile : $file\n";
         return $file;
 
     }
@@ -37,7 +42,7 @@ class AopClassLoader //extends ClassLoader
     public function loadClass($class)
     {
         $file = $this->findFile($class);
-
+        echo "$class \n";
         if ($file !== false) {
             include $file;
         }
@@ -70,5 +75,3 @@ class AopClassLoader //extends ClassLoader
     }
 
 }
-
-//AopClassLoader::init();

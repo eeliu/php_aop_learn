@@ -50,7 +50,11 @@ class Foo
     /// test 1 parameter
     public function foo_p3_rbool($p1,$p2,$p3):bool
     {
-        return true;
+        $args = func_num_args();
+        echo __METHOD__.":count=".count($args)."\n";
+        if(true)
+            throw new \Exception("");
+        return false;
     }
 
     /// test 1 parameter

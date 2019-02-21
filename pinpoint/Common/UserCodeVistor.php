@@ -74,14 +74,12 @@ class UserCodeVisitor extends NodeVisitorAbstract
 //        echo "leave".$node->getType()."\n";
         if ($node instanceof Node\Stmt\ClassMethod){
             $func = trim( $node->name->toString());
-
             if(array_key_exists($func,$this->ospIns->mFuncAr))
             {
                 $this->ospIns->shadowClass->handleClassLeaveMethodNode($node,$this->ospIns->mFuncAr[$func]);
                 $this->ospIns->originClass->handleClassLeaveMethodNode($node,$this->ospIns->mFuncAr[$func]);
                 unset( $this->ospIns->mFuncAr[$func] );
             }
-
         }elseif ($node instanceof Node\Expr\FuncCall){
             /// todo parse internal funcCall
         }
@@ -110,8 +108,5 @@ class UserCodeVisitor extends NodeVisitorAbstract
         $this->ospIns->orgClassNodeDoneCB($node,$this->ospIns->originClass->className);
         echo $this->ospIns->originClass->className."\n";
     }
-
-
-
 
 }

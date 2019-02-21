@@ -6,32 +6,30 @@
  */
 
 namespace pinpoint\Common;
-
+use pinpoint\Common\Util;
 
 class ClassMap
 {
-    private $classMap;
-    public $index_file_name;
+    public $classMap=[];
 
-    /**
-     * @return mixed
-     */
-    public function getClassMap()
+    public function __construct($file=null)
     {
-        return $this->classMap;
+        if($file)
+        {
+            $str = file_get_contents($file);
+            $this->classMap = unserialize($str);
+        }
     }
 
     public function insertMapping($cl,$file)
     {
         $this->classMap[$cl] = $file;
     }
+
     public function persistenceClassMapping($file)
     {
-        /// serialize $file
-    }
-    public function __construct($file)
-    {
-        $this->index_file_name = $file;
+        $context = serialize($this->classMap);
+        Util::flushStr2File($context,$file);
     }
     public function debug()
     {

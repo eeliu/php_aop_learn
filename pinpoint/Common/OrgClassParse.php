@@ -14,6 +14,7 @@ use PhpParser\PrettyPrinter;
 use PhpParser\Error;
 use PhpParser\Node;
 use PhpParser\BuilderFactory;
+use pinpoint\Common\Util;
 
 
 class OrgClassParse
@@ -105,7 +106,7 @@ class OrgClassParse
             $this->rawOrigStmts,
             $this->lexer->getTokens());
 
-        $this->flushStr2File($orgClassStr,$fullPath);
+        Util::flushStr2File($orgClassStr,$fullPath);
         $this->classIndex[$fullName] = $fullPath;
     }
 
@@ -113,18 +114,11 @@ class OrgClassParse
     {
         $fullPath = $this->cfg['cache_dir'].'/'.str_replace('\\','/',$fullName).'.php';
         $context= $this->printer->prettyPrintFile(array($node));
-        $this->flushStr2File($context,$fullPath);
+        Util::flushStr2File($context,$fullPath);
         $this->classIndex[$fullName] = $fullPath;
     }
 
-    public function flushStr2File(&$context, $fullPath)
-    {
-        $dir = dirname($fullPath);
-        if(!is_dir($dir)){
-            mkdir($dir);
-        }
-        file_put_contents($fullPath,$context);
-    }
+
 
     public function generateAllClass():array
     {

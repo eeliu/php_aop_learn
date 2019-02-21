@@ -37,4 +37,14 @@ class Util
         return [];
     }
 
+    public static function flushStr2File(&$context, $fullPath)
+    {
+        $dir = dirname($fullPath);
+        if(!is_dir($dir)){
+            mkdir($dir);
+        }
+        file_put_contents($fullPath,$context);
+    }
+
+
 }

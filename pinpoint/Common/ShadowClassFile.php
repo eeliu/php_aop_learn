@@ -40,7 +40,7 @@ class ShadowClassFile extends ClassFile
         parent::handleEnterClassNode($node);
 
         assert($node instanceof Node\Stmt\Class_);
-        $extClass = $this->prefix.'_'.$node->name->toString();
+        $extClass = $this->prefix.$node->name->toString();
         $this->classNode  = $this->factory->class(trim($node->name->toString()))->extend($extClass);
         $this->useArray[] = $this->namespace.'\\'.$extClass;
 
@@ -120,6 +120,9 @@ class ShadowClassFile extends ClassFile
         }
 
         $thisMethod->addParams($node->params);
+        if($node->returnType){
+            $thisMethod->setReturnType($node->returnType);
+        }
 
         /// $var = new CommonPlugins(__FUNCTION__,self,$p);
         $newPluginsStm = new Node\Stmt\Expression(new Node\Expr\Assign(new Node\Expr\Variable("var"),
@@ -130,26 +133,54 @@ class ShadowClassFile extends ClassFile
         $tryBlock = [];
         $catchNode = [];
 
-
-
         if ($mode & PluginParser::BEFORE)
         {
             // $var->onBefore();
             $tryBlock[] = new Node\Stmt\Expression(
                 $this->factory->methodCall(new Node\Expr\Variable("var"), "onBefore"));
         }
-            // paraent::$thisFuncName
+
         if ($this->hasRet) {
+            /// $ret = paraent::$thisFuncName();
             $tryBlock[] = new Node\Stmt\Expression(new Node\Expr\Assign(
                 new Node\Expr\Variable("ret"),
                 new Node\Expr\StaticCall(new Node\Name("parent"),
                     new Node\Identifier($thisFuncName),
                     ShadowClassFile::convertParamsName2Arg($node->params))));
+
+            /// $var->onEnd($ret);
+            if($mode & PluginParser::END)
+            {
+                $tryBlock[] = new Node\Stmt\Expression(
+                    $this->factory->methodCall(
+                        new Node\Expr\Variable("var"),
+                        "onEnd",
+                        [new Node\Expr\Variable('ret')]
+                    )
+                );
+            }
+
+            /// return $var;
+            $tryBlock[] = new Node\Stmt\Return_(new Node\Expr\Variable('ret'));
+
         } else {
+            /// paraent::$thisFuncName();
+
             $tryBlock[] = new Node\Stmt\Expression($this->factory->staticCall(
                 new Node\Name("parent")
                 , new Node\Identifier($thisFuncName),
                 ShadowClassFile::convertParamsName2Arg($node->params)));
+
+            /// $var->onEnd($ret);
+            if($mode & PluginParser::END)
+            {
+                $tryBlock[] = new Node\Stmt\Expression(
+                    $this->factory->methodCall(
+                        new Node\Expr\Variable("var"),
+                        "onEnd",
+                        [new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('null')))])
+                );
+            }
         }
 
 
@@ -162,38 +193,16 @@ class ShadowClassFile extends ClassFile
                 $this->factory->methodCall(new Node\Expr\Variable("var"),
                     "onException",$expArgs));
 
-        } else {
-
-            $catchBlock[] = new Node\Stmt\Throw_(new Node\Expr\Variable("e"));
         }
+
+        $catchBlock[] = new Node\Stmt\Throw_(new Node\Expr\Variable("e"));
 
         $catchNode[] = new Node\Stmt\Catch_([new Node\Name('\Exception')],
                                     new Node\Expr\Variable('e'),
                                     $catchBlock);
-        $finallyBlock = [];
-        if($mode & PluginParser::END)
-        {
-            /// if onEnd
-            if ($this->hasRet) {
-                $finallyBlock[] = new Node\Stmt\Expression(
-                    $this->factory->methodCall(
-                        new Node\Expr\Variable("var"),
-                        "onEnd",
-                        [new Node\Expr\Variable('ret')])
-                );
-            }else{
-                $finallyBlock[] = new Node\Stmt\Expression(
-                    $this->factory->methodCall(
-                        new Node\Expr\Variable("var"),
-                        "onEnd",
-                        [new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('null')))])
-                );
-            }
-        }
 
-        $finallyNode =  new Node\Stmt\Finally_($finallyBlock);
 
-        $tryCatchFinallyNode = new Node\Stmt\TryCatch($tryBlock,$catchNode,$finallyNode);
+        $tryCatchFinallyNode = new Node\Stmt\TryCatch($tryBlock,$catchNode);
 
         $thisMethod->addStmt($tryCatchFinallyNode);
         $this->methodNodes[] = $thisMethod;
