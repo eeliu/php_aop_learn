@@ -15,6 +15,7 @@ use PhpParser\NodeVisitorAbstract;
 use PhpParser\NodeTraverser;
 use pinpoint\Common\PluginVisitor;
 
+
 class PluginParser
 {
     private $clArray;

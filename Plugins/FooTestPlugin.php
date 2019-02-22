@@ -1,8 +1,8 @@
 <?php
-namespace Pinpoint\Plugins;
-use Pinpoint\Plugins\Candy;
+namespace Plugins;
+use Plugins\Candy;
 
-class FooTestPlugin1 extends Candy
+class FooTestPlugin extends Candy
 {
     ///@hook:app\Foo::foo_p1
     public function onBefore(){

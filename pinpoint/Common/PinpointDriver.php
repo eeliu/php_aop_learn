@@ -9,6 +9,7 @@ namespace pinpoint\Common;
 use pinpoint\Common\OrgClassParse;
 use pinpoint\Common\AopClassLoader;
 use pinpoint\Common\ClassMap;
+use pinpoint\Common\PluginParser;
 
 class PinpointDriver
 {

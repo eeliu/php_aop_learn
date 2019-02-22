@@ -1,6 +1,6 @@
 <?php
-namespace Pinpoint\Plugins;
-use Pinpoint\Plugins\Candy;
+namespace Plugins;
+use Plugins\Candy;
 
 ///@hook:app\Foo::foo_p3_rbool app\Foo::foo_p3_rfloat app\Foo::foo_p3
 /// @hook:test wrong format

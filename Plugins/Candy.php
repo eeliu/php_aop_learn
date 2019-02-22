@@ -5,7 +5,7 @@
  * Time: 3:23 PM
  */
 
-namespace Pinpoint\Plugins;
+namespace Plugins;
 
 
 abstract class Candy

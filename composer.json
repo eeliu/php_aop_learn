@@ -1,9 +1,12 @@
 {
-    "autoload": {
-        "classmap": [
-            "./"
-        ]
-    },
+"autoload": {
+    "psr-4": {
+        "app\\":"app/",
+        "pinpoint\\": "pinpoint/",
+        "Plugins\\": "Plugins/"
+    }
+},
+
     "require-dev": {
         "phpunit/phpunit": "^7"
     },
